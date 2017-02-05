@@ -1,0 +1,22 @@
+def repo_available():
+    """Checks the repo path for proper directory structure.
+    If the directories look wrong we probably don't have a
+    valid repo path. Returns True if things look OK."""
+    if not REPO_PATH:
+        print >> sys.stderr, 'No repo path specified.'
+        return False
+#This could also be the culprit, in that mount_repo_cli() is being called when I haven't provided a REPO_URL
+#and REPO_PATH must be being read ok, cause I'm not getting the "no repo path" message above, I suppose I could comment
+#out the condition statement saying to check the REPO_URL, and just make sure os.path.exists(REPO_PATH) isn't returning
+#false. But regardless, mount_repo_cli() should only be getting called if theres a value set for REPO_URL, and there
+#isn't when I'm seeing this problem. 
+    if not os.path.exists(REPO_PATH) and REPO_URL:
+        mount_repo_cli()
+    if not os.path.exists(REPO_PATH):
+        return False
+    for subdir in ['catalogs', 'manifests', 'pkgs', 'pkgsinfo']:
+        if not os.path.exists(os.path.join(REPO_PATH, subdir)):
+            print >> sys.stderr, "%s is missing %s" % (REPO_PATH, subdir)
+            return False
+    # if we get this far, the repo path looks OK
+    return True
