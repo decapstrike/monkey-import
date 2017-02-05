@@ -2,6 +2,7 @@ def mount_repo_cli():
     """Attempts to connect to the repo fileshare"""
     global WE_MOUNTED_THE_REPO
     if os.path.exists(REPO_PATH):
+    #Think this is where we go wrong
         return
     print 'Attempting to mount fileshare %s:' % REPO_URL
     if NETFSMOUNTURLSYNC_AVAILABLE:
