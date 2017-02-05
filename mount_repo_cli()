@@ -1,0 +1,31 @@
+def mount_repo_cli():
+    """Attempts to connect to the repo fileshare"""
+    global WE_MOUNTED_THE_REPO
+    if os.path.exists(REPO_PATH):
+        return
+    print 'Attempting to mount fileshare %s:' % REPO_URL
+    if NETFSMOUNTURLSYNC_AVAILABLE:
+        # mount the share using the NetFS API
+        try:
+            mount_share_url(REPO_URL)
+        except ShareMountException, err:
+            print >> sys.stderr, err
+        else:
+            WE_MOUNTED_THE_REPO = True
+    else:
+        # do it the old way
+        os.mkdir(REPO_PATH)
+        if REPO_URL.startswith('afp:'):
+            cmd = ['/sbin/mount_afp', '-i', REPO_URL, REPO_PATH]
+        elif REPO_URL.startswith('smb:'):
+            cmd = ['/sbin/mount_smbfs', REPO_URL[4:], REPO_PATH]
+        elif REPO_URL.startswith('nfs://'):
+            cmd = ['/sbin/mount_nfs', REPO_URL[6:], REPO_PATH]
+        else:
+            print >> sys.stderr, 'Unsupported filesystem URL!'
+            return
+        retcode = subprocess.call(cmd)
+        if retcode:
+            os.rmdir(REPO_PATH)
+        else:
+            WE_MOUNTED_THE_REPO = True
